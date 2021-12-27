@@ -1,163 +1,46 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[139]:
-
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sas
 
-
-# In[140]:
-
-
 df = pd.read_csv('D:\Intern\Machine_Learning_Projects\Hotel_Booking_Prediction/hotel_bookings.csv')
-
-
-# In[141]:
-
-
-df.head()
-
-
-# In[142]:
-
-
+df.head
 df.shape
-
-
-# In[143]:
-
-
 df.isna().sum()
-
-
-# In[144]:
-
-
 def data_clean(df):
     df.fillna(0,inplace=True)
     print(df.isnull().sum())
-
-
-# In[145]:
-
-
 data_clean(df)
-
-
-# In[146]:
-
-
 df.columns
-
-
-# In[147]:
-
-
 list=['adults', 'children', 'babies']
 for i in list:
     print('{} has uniques values as {}'.format(i,df[i].unique()))
 
-
-# In[148]:
-
-
 pd.set_option('display.max_columns',32)
-
-
-# In[149]:
-
-
 filter = (df['children']==0)&(df['adults']==0)&(df['babies']==0)
 df[filter]
-
-
-# In[150]:
-
-
 data = df[~filter]
 data.head()
-
-
-# In[151]:
-
-
 country_wise_data=data[data['is_canceled']==0]['country'].value_counts().reset_index()
-
-
-# In[152]:
-
-
 country_wise_data.columns = ['Country','No of guests']
 print(country_wise_data)
 
-
-# In[153]:
-
-
 get_ipython().system('pip install folium')
-
-
-# In[154]:
-
-
 import folium
 from folium.plugins import HeatMap
-
-
-# In[155]:
-
-
 folium.Map()
-
-
-# In[156]:
-
-
 get_ipython().system('pip install plotly')
-
-
-# In[157]:
-
-
 import plotly.express as px
-
-
-# In[158]:
-
-
 map_guest=px.choropleth(country_wise_data,
              locations=country_wise_data['Country'],
              color=country_wise_data['No of guests'],
              hover_name=country_wise_data['Country'],
              title='Home country of Guests')
 map_guest.show()
-
-
-# In[159]:
-
-
 data.head()
 
-
-# In[160]:
-
-
 data2=data[data['is_canceled']==0]
-
-
-# In[161]:
-
-
 data2.columns
-
-
-# In[162]:
-
-
 plt.figure(figsize=(12,8))
 sas.boxplot(x='reserved_room_type',y='adr',hue='hotel',data=data2)
 plt.title('Price of room type per night and per person')
@@ -166,83 +49,26 @@ plt.ylabel('Price(Euro)')
 plt.legend()
 plt.show()
 
-
-# In[163]:
-
-
 data_resort=data[(data['hotel']=='Resort Hotel')&(data['is_canceled']==0)]
 data_city=data[(data['hotel']=='Resort Hotel')&(data['is_canceled']==0)]
-
-
-# In[164]:
-
-
 data_resort.head()
-
-
-# In[165]:
-
-
 resort_hotel=data_resort.groupby(['arrival_date_month'])['adr'].mean().reset_index()
 resort_hotel
-
-
-# In[166]:
-
-
 city_hotel=data_city.groupby(['arrival_date_month'])['adr'].mean().reset_index()
 city_hotel
-
-
-# In[167]:
-
 
 final=resort_hotel.merge(city_hotel,on='arrival_date_month')
 final.columns=['Month','Price_for_resort_hotel','Price_for_city_hotel']
 final
 
-
-# In[168]:
-
-
 get_ipython().system('pip install sorted-months-weekdays    #Installing packages  ')
-
-
-# In[169]:
-
-
 get_ipython().system('pip install sort-dataframeby-monthorweek #Installing packages')
-
-
-# In[170]:
-
-
 import sort_dataframeby_monthorweek as sd #importing package and giving an alias
-
-
-# In[171]:
-
-
 def sort_data(df,colname):                          #function taking inputs - dataframe and column name
     return sd.Sort_Dataframeby_Month(df,colname)    #returning sorted order of month
-
-
-# In[172]:
-
-
 final=sort_data(final,'Month') #Calling the function and giving parameters
 final                  #printing the table
-
-
-# In[173]:
-
-
 final.columns                   #Checking column names
-
-
-# In[174]:
-
-
 px.line(final,x='Month',y=['Price_for_resort_hotel', 'Price_for_city_hotel'],title='Room price per night over the months')           #plotting table using line
 
 
